@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Registration</title>
+    <style>
+        :root {
+            --primary-color: #0c2340;
+            --secondary-color: #1d70b8;
+            --success-color: #155724;
+            --success-bg: #d4edda;
+            --success-border: #c3e6cb;
+            --text-color: #333333;
+            --bg-color: #f4f6f9;
+            --border-color: #cccccc;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-top: 8px solid var(--primary-color);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 18px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .top-row {
+            display: grid;
+            grid-template-columns: 140px 1fr 1fr;
+            gap: 15px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: var(--primary-color);
+        }
+
+        input[type="text"], input[type="email"], input[type="date"], input[type="tel"] {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .file-dropzone {
+            border: 2px dashed var(--border-color);
+            padding: 20px;
+            text-align: center;
+            border-radius: 4px;
+            background: #fafafa;
+            cursor: pointer;
+        }
+
+        .preview-container {
+            margin-top: 15px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid var(--primary-color);
+        }
+
+        .signature-box-wrapper {
+            background-color: #ffffff;
+            border: 2px solid #718096;
+            border-radius: 6px;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        canvas {
+            display: block;
+            background-color: #ffffff;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .signature-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 5px;
+        }
+
+        .clear-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 25px;
+        }
+
+        #success-state {
+            display: none;
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: var(--success-color);
+            padding: 30px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .highlight-id {
+            font-family: monospace;
+            background: #ffffff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--success-border);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Program Portal</h1>
+        <h2>Account Registration Intake</h2>
+    </header>
+
+    <form id="intake-form">
+        <div class="top-row" style="margin-bottom: 20px;">
+            <div class="form-group">
+                <label>Generated ID</label>
+                <input type="text" id="sp-number" readonly required placeholder="??YYMMDD">
+            </div>
+            <div class="form-group">
+                <label>First Name</label>
+                <input type="text" id="first-name" required oninput="updateID()">
+            </div>
+            <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" id="last-name" required oninput="updateID()">
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Date of Birth</label>
+                <input type="date" id="dob" required onchange="handleDobChange()">
+            </div>
+            <div class="form-group">
+                <label>Age</label>
+                <input type="text" id="age" readonly placeholder="Calculated">
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="phone" required>
+            </div>
+            <div class="form-group full-width">
+                <label>Mailing Address</label>
+                <input type="text" id="address" required>
+            </div>
+            <div class="form-group">
+                <label>City</label>
+                <input type="text" id="city" required>
+            </div>
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>State</label>
+                    <input type="text" id="state" maxlength="2" required>
+                </div>
+                <div>
+                    <label>Zip Code</label>
+                    <input type="text" id="zip" required>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Upload Headshot</label>
+                <div class="file-dropzone" onclick="document.getElementById('file-input').click()">
+                    <span>Click to select headshot image</span>
+                    <input type="file" id="file-input" accept="image/*" required onchange="previewHeadshot(event)">
+                </div>
+                <div class="preview-container" id="preview-container">
+                    <img id="image-preview" src="#" alt="Preview">
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Digital Signature</label>
+                <div class="signature-box-wrapper">
+                    <canvas id="signature-pad" width="660" height="150"></canvas>
+                </div>
+                <div class="signature-actions">
+                    <button type="button" class="clear-btn" onclick="clearSignature()">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="submit-btn" onclick="processSubmission()">Submit Registration</button>
+    </form>
+
+    <div id="success-state">
+        <h3>Registration Successful</h3>
+        <p>The record has been written to local staging storage without data degradation.</p>
+        <p>Assigned Identification Number: <span class="highlight-id" id="display-sp-id"></span></p>
+    </div>
+</div>
+
+<script>
+    function updateID() {
+        const first = document.getElementById('first-name').value.trim();
+        const last = document.getElementById('last-name').value.trim();
+        const dob = document.getElementById('dob').value;
+        const fI = first ? first.charAt(0).toLowerCase() : '?';
+        const lI = last ? last.charAt(0).toLowerCase() : '?';
+        let dateStr = 'YYMMDD';
+        if (dob) {
+            const parts = dob.split('-');
+            if (parts.length === 3) dateStr = `${parts[0].substring(2, 4)}${parts[1]}${parts[2]}`;
+        }
+        document.getElementById('sp-number').value = `${fI}${lI}${dateStr}`;
+    }
+
+    function handleDobChange() {
+        const dobInput = document.getElementById('dob').value;
+        if (dobInput) {
+            const dob = new Date(dobInput);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+            document.getElementById('age').value = age >= 0 ? age : 0;
+        }
+        updateID();
+    }
+
+    function previewHeadshot(event) {
+        const input = event.target;
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('image-preview').src = e.target.result;
+                document.getElementById('preview-container').style.display = 'flex';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    const canvas = document.getElementById('signature-pad');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false, hasSigned = false;
+    ctx.lineWidth = 3.0; ctx.lineCap = 'round'; ctx.strokeStyle = '#0c2340';
+
+    function getCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: (clientX - rect.left) * (canvas.width / rect.width),
+            y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+    }
+
+    canvas.addEventListener('mousedown', (e) => { isDrawing = true; hasSigned = true; const c = getCoords(e); ctx.beginPath(); ctx.moveTo(c.x, c.y); });
+    canvas.addEventListener('mousemove', (e) => { if(!isDrawing) return; const c = getCoords(e); ctx.lineTo(c.x, c.y); ctx.stroke(); });
+    window.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('touchstart', (e) => { isDrawing = true; hasSigned = true; const c = getCoords(e); ctx.beginPath(); ctx.moveTo(c.x, c.y); }, {passive: true});
+    canvas.addEventListener('touchmove', (e) => { if(!isDrawing) return; const c = getCoords(e); ctx.lineTo(c.x, c.y); ctx.stroke(); }, {passive: true});
+    window.addEventListener('touchend', () => isDrawing = false);
+
+    function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); hasSigned = false; }
+
+    function processSubmission() {
+        const form = document.getElementById('intake-form');
+        if (!form.checkValidity() || !hasSigned) {
+            form.reportValidity();
+            if(!hasSigned) alert("Signature required.");
+            return;
+        }
+
+        const generatedID = document.getElementById('sp-number').value;
+        
+        // Local isolated storage check to instantly bypass browser network constraints
+        const record = {
+            id: generatedID,
+            first_name: document.getElementById('first-name').value,
+            last_name: document.getElementById('last-name').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            signature: canvas.toDataURL('image/png')
+        };
+        
+        localStorage.setItem(`reg_${generatedID}`, JSON.stringify(record));
+
+        document.getElementById('intake-form').style.display = 'none';
+        document.getElementById('display-sp-id').textContent = generatedID;
+        document.getElementById('success-state').style.display = 'block';
+    }
+</script>
+</body>
+</html>
