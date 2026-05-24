@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WRNMMC - Standardized Patient Registration</title>
+    <style>
+        :root {
+            --primary-color: #0c2340; /* Navy Blue */
+            --secondary-color: #1d70b8; /* Light Blue Accent */
+            --success-color: #155724; /* Deep Green Text */
+            --success-bg: #d4edda; /* Light Green Background */
+            --success-border: #c3e6cb;
+            --text-color: #333333;
+            --bg-color: #f4f6f9;
+            --border-color: #cccccc;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-top: 8px solid var(--primary-color);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 18px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        /* 3-column layout for the top row */
+        .top-row {
+            display: grid;
+            grid-template-columns: 140px 1fr 1fr;
+            gap: 15px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: var(--primary-color);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="tel"] {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        input[readonly] {
+            background-color: #e9ecef;
+            color: #495057;
+            cursor: not-allowed;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        /* File Upload Dropzone Styling */
+        .file-dropzone {
+            border: 2px dashed var(--border-color);
+            padding: 20px;
+            text-align: center;
+            border-radius: 4px;
+            background: #fafafa;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .file-dropzone:hover {
+            background: #f0f4f8;
+            border-color: var(--secondary-color);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .preview-container {
+            margin-top: 15px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+        .file-name {
+            margin-top: 5px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* High-Visibility Signature Layout Box */
+        .signature-box-wrapper {
+            background-color: #ffffff;
+            border: 2px solid #718096; /* Definitive gray border */
+            border-radius: 6px;
+            padding: 5px;
+            display: block;
+            width: 100%;
+            max-width: 670px;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        canvas {
+            display: block;
+            background-color: #ffffff;
+            cursor: crosshair;
+            touch-action: none; /* Prevents scrolling while signing on mobile devices */
+        }
+
+        .signature-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 5px;
+        }
+
+        .clear-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .clear-btn:hover {
+            background-color: #5a6268;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 25px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #11335c;
+        }
+
+        /* Success Message Styling */
+        #success-state {
+            display: none;
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: var(--success-color);
+            padding: 30px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        #success-state h3 {
+            margin-top: 0;
+            font-size: 20px;
+            border-bottom: 1px solid var(--success-border);
+            padding-bottom: 10px;
+        }
+
+        .highlight-id {
+            font-family: monospace;
+            background: #ffffff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--success-border);
+            font-weight: bold;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .contact-info {
+            margin-top: 20px;
+            font-size: 14px;
+            border-top: 1px solid var(--success-border);
+            padding-top: 15px;
+            color: #2b5435;
+        }
+
+        @media (max-width: 650px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .top-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Walter Reed National Military Medical Center</h1>
+        <h2>Standardized Patient Program - Account Registration</h2>
+    </header>
+
+    <form id="intake-form" onsubmit="handleSubmit(event)">
+        
+        <div class="top-row" style="margin-bottom: 20px;">
+            <div class="form-group">
+                <label for="sp-number">SP ID Number</label>
+                <input type="text" id="sp-number" readonly required placeholder="??YYMMDD">
+            </div>
+
+            <div class="form-group">
+                <label for="first-name">First Name</label>
+                <input type="text" id="first-name" required oninput="updateSPNumber()">
+            </div>
+
+            <div class="form-group">
+                <label for="last-name">Last Name</label>
+                <input type="text" id="last-name" required oninput="updateSPNumber()">
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" required onchange="handleDobChange()">
+            </div>
+
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input type="text" id="age" readonly placeholder="Calculated from DOB">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Cell Phone Number</label>
+                <input type="tel" id="phone" placeholder="(555) 555-5555" required>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="address">Mailing Address</label>
+                <input type="text" id="address" required>
+            </div>
+
+            <div class="form-group">
+                <label for="city">City</label>
+                <input type="text" id="city" required>
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label for="state">State</label>
+                    <input type="text" id="state" placeholder="MD" maxlength="2" required>
+                </div>
+                <div>
+                    <label for="zip">Zip Code</label>
+                    <input type="text" id="zip" pattern="[0-9]{5}(-[0-9]{4})?" placeholder="20814" required>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Upload Headshot File</label>
+                <div class="file-dropzone" onclick="document.getElementById('file-input').click()">
+                    <span>Click to select or drag & drop headshot image</span>
+                    <input type="file" id="file-input" accept="image/*" required onchange="previewHeadshot(event)">
+                </div>
+                <div class="preview-container" id="preview-container">
+                    <img id="image-preview" src="#" alt="Headshot Preview">
+                    <div class="file-name" id="file-name"></div>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Digital Signature (Sign Below)</label>
+                <div class="signature-box-wrapper">
+                    <canvas id="signature-pad" width="660" height="150"></canvas>
+                </div>
+                <div class="signature-actions">
+                    <button type="button" class="clear-btn" onclick="clearSignature()">Clear Signature</button>
+                </div>
+            </div>
+
+        </div>
+
+        <button type="submit">Submit Registration</button>
+    </form>
+
+    <div id="success-state">
+        <h3>Thank You</h3>
+        <p>Your registration has been saved successfully.</p>
+        <p>You will need to use your SP Identification Number, <span class="highlight-id" id="display-sp-id"></span>, when clocking in and out of your events.</p>
+        
+        <div class="contact-info">
+            <strong>Questions?</strong> Please direct them to the Department of Simulation's Administrator:<br>
+            ✉️ <a href="mailto:mark.j.wyn.civ@health.mil" style="color: var(--success-color); font-weight: bold;">mark.j.wyn.civ@health.mil</a> or 📞 (301) 400-3839
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Core Logic: Generate unique SP Number based on initials + YYMMDD
+    function updateSPNumber() {
+        const firstName = document.getElementById('first-name').value.trim();
+        const lastName = document.getElementById('last-name').value.trim();
+        const dobInput = document.getElementById('dob').value;
+
+        const firstInitial = firstName ? firstName.charAt(0).toLowerCase() : '?';
+        const lastInitial = lastName ? lastName.charAt(0).toLowerCase() : '?';
+        
+        let datePart = 'YYMMDD';
+        
+        if (dobInput) {
+            const parts = dobInput.split('-');
+            if (parts.length === 3) {
+                const yy = parts[0].substring(2, 4);
+                const mm = parts[1];
+                const dd = parts[2];
+                datePart = `${yy}${mm}${dd}`;
+            }
+        }
+
+        document.getElementById('sp-number').value = `${firstInitial}${lastInitial}${datePart}`;
+    }
+
+    function handleDobChange() {
+        calculateAge();
+        updateSPNumber();
+    }
+
+    // 2. Auto-calculate Age based on DOB
+    function calculateAge() {
+        const dobInput = document.getElementById('dob').value;
+        if (!dobInput) return;
+
+        const dob = new Date(dobInput);
+        const today = new Date();
+        
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+
+        document.getElementById('age').value = age >= 0 ? age : 0;
+    }
+
+    // 3. Process and display the uploaded Headshot file image
+    function previewHeadshot(event) {
+        const input = event.target;
+        const container = document.getElementById('preview-container');
+        const preview = document.getElementById('image-preview');
+        const nameLabel = document.getElementById('file-name');
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                container.style.display = 'flex';
+                nameLabel.textContent = file.name;
+            }
+
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // 4. Repaired & Cleaned Signature Pad Engine
+    const canvas = document.getElementById('signature-pad');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let hasSigned = false;
+
+    // Line and ink stroke parameters
+    ctx.lineWidth = 3.0;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#0c2340'; /* Classic Navy Blue Ink */
+
+    function getCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        
+        // Split metrics logic between mobile touch layouts and standard desktop cursor coords
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        return {
+            x: (clientX - rect.left) * (canvas.width / rect.width),
+            y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+    }
+
+    function startDrawing(e) {
+        isDrawing = true;
+        hasSigned = true;
+        const coords = getCoords(e);
+        ctx.beginPath();
+        ctx.moveTo(coords.x, coords.y);
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        const coords = getCoords(e);
+        ctx.lineTo(coords.x, coords.y); // Fix applied clean here
+        ctx.stroke();
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath();
+    }
+
+    // Desktop Event Bindings
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', stopDrawing);
+
+    // Mobile/Tablet Touch Event Bindings
+    canvas.addEventListener('touchstart', (e) => { startDrawing(e); }, { passive: true });
+    canvas.addEventListener('touchmove', (e) => { draw(e); }, { passive: true });
+    window.addEventListener('touchend', stopDrawing);
+
+    function clearSignature() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        hasSigned = false;
+    }
+
+    // 5. Handle form submission
+    function handleSubmit(event) {
+        event.preventDefault();
+        
+        if (!hasSigned) {
+            alert("Please provide a digital signature before submitting.");
+            return;
+        }
+
+        const generatedID = document.getElementById('sp-number').value;
+        const signatureImageBase64 = canvas.toDataURL('image/png');
+
+        const formData = {
+            sp_number: generatedID,
+            first_name: document.getElementById('first-name').value,
+            last_name: document.getElementById('last-name').value,
+            dob: document.getElementById('dob').value,
+            age: document.getElementById('age').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            address: document.getElementById('address').value,
+            city: document.getElementById('city').value,
+            state: document.getElementById('state').value,
+            zip: document.getElementById('zip').value,
+            signature_data: signatureImageBase64
+        };
+
+        console.log("Form payload compiled successfully:", formData);
+
+        // Transition views immediately without a page reload
+        document.getElementById('intake-form').style.display = 'none';
+        document.getElementById('display-sp-id').textContent = generatedID;
+        document.getElementById('success-state').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
